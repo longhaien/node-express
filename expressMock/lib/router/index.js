@@ -1,3 +1,4 @@
+const http = require('http');
 const Layer = require('./layer');
 const Route = require('./route');
 
@@ -36,11 +37,15 @@ Router.prototype.route = function route(path) {
   return route;
 }
 
-Router.prototype.get = function (path, fn) {
-  var route = this.route(path);
-  route.get(fn);
+http.METHODS.forEach(function (method) {
 
-  return this;
-}
+  method = method.toLowerCase();
+  Router.prototype[method] = function (path, fn) {
+    var route = this.route(path);
+    route[method].call(route, fn);
+
+    return this;
+  }
+})
 
 exports = module.exports = Router;
