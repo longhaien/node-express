@@ -1,32 +1,26 @@
-var Router = function () {
-  this.stack = [{
-    path: '*',
-    method: '*',
-    handle: function (req, res) {
-      res.writeHead(200, { 'Content-Type': 'text/plain' });
-      res.end('404');
-    }
-  }]
-}
+const Layer = require('./layer');
 
-Router.prototype.get = function (path, fn) {
-  this.stack.push({
-    path,
-    method: 'GET',
-    handle: fn
-  })
+var Router = function () {
+  this.stack = [new Layer('*', function (req, res) {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('404');
+  })]
 }
 
 Router.prototype.handle = function (req, res) {
   for (var i = 1, len = this.stack.length; i < len; i++) {
     const stackItem = this.stack[i];
-    if ((req.url === stackItem.path || stackItem.path === '*') &&
-      (req.method === stackItem.method || stackItem.method === '*')) {
-      return stackItem.handle && stackItem.handle(req, res);
+
+    if (stackItem.match(req.url)) {
+      return stackItem.handle_request(req, res);
     }
   }
 
-  return this.stack[0].handle && this.stack[0].handle(req, res);
+  return this.stack[0].handle_request && this.stack[0].handle_request(req, res);
+}
+
+Router.prototype.get = function (path, fn) {
+  this.stack.push(new Layer(path, fn))
 }
 
 exports = module.exports = Router;
