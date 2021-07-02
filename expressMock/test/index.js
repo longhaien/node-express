@@ -3,7 +3,10 @@ const expross = require('./../lib/expross');
 const app = expross();
 
 app.get('/', function (req, res) {
-  res.send('hello world');
+  res.send('get hello world');
+})
+app.put('/', function (req, res) {
+  res.send('put hello world');
 })
 
 app.listen(3000, function (req, res) {
